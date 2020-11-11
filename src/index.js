@@ -4,10 +4,12 @@ const cors = require("cors");
 const formidable = require("express-formidable");
 const mongoose = require("mongoose");
 const cloudinary = require("cloudinary").v2;
+const helmet = require("helmet");
 
 const app = express();
 app.use(cors());
 app.use(formidable());
+app.use(helmet());
 
 // Cloudinary logs
 cloudinary.config({
