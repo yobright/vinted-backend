@@ -43,16 +43,39 @@ router.get("/offers", async (req, res) => {
         sort.product_price = -1;
       }
     }
-    const offer = await Offer.find(filter)
+    const offers = await Offer.find(filter)
       .sort(sort)
       .limit(numberOfResults)
-      .skip(pages);
-
-    const counter = await Offer.countDocuments(filter);
-    res.status(200).json({ offer, counter });
+      .skip(pages)
+      .populate({
+        path: "owner",
+        select: "account",
+      });
+    const counter = await Offers.countDocuments(filter);
+    res.status(200).json({ offers, counter });
   } catch (error) {
     res.status(400).json({
       message: error.message,
+    });
+  }
+});
+
+router.get("/offer/:id", async (req, res) => {
+  try {
+    const offer = await Offer.findById(req.params.id).populate({
+      path: "owner",
+      select: "account",
+    });
+    if (!offer) {
+      res.status(400).json({
+        message: "Offer does not exist",
+      });
+    } else {
+      res.status(200).json(offer);
+    }
+  } catch (error) {
+    res.status(400).json({
+      message: "Bad request",
     });
   }
 });
@@ -103,6 +126,7 @@ router.post("/offer/publish", isAuthenticated, async (req, res) => {
 
       const result = await cloudinary.uploader.upload(req.files.picture.path, {
         folder: `/vinted/offers/${newOffer._id}`,
+        public_id: "preview",
       });
 
       newOffer.product_image = result;
@@ -112,26 +136,6 @@ router.post("/offer/publish", isAuthenticated, async (req, res) => {
     }
   } catch (error) {
     res.status(400).json({ error: error.message });
-  }
-});
-
-router.delete("/offer/delete/:id", isAuthenticated, async (req, res) => {
-  try {
-    const offer = await Offer.findById(req.params.id);
-    if (offer) {
-      await offer.deleteOne();
-      res.status(200).json({
-        message: "Offer deleted",
-      });
-    } else {
-      res.status(400).json({
-        message: "Offer does not exist",
-      });
-    }
-  } catch (error) {
-    res.status(400).json({
-      message: "Bad request",
-    });
   }
 });
 
@@ -198,18 +202,24 @@ router.put("/offer/update/:id", isAuthenticated, async (req, res) => {
   }
 });
 
-router.get("/offer/:id", async (req, res) => {
+router.delete("/offer/delete/:id", isAuthenticated, async (req, res) => {
   try {
-    const offer = await Offer.findById(req.params.id).populate({
-      path: "owner",
-      select: "account _id",
-    });
-    if (!offer) {
+    const offer = await Offer.findById(req.params.id);
+    if (offer) {
+      await cloudinary.api.delete_resources_by_prefix(
+        `api/vinted/offers/${req.params.id}`
+      );
+
+      await cloudinary.api.delete_folder(`api/vinted/offers/${req.params.id}`);
+
+      await offer.deleteOne();
+      res.status(200).json({
+        message: "Offer deleted succesfully !",
+      });
+    } else {
       res.status(400).json({
         message: "Offer does not exist",
       });
-    } else {
-      res.status(200).json(offer);
     }
   } catch (error) {
     res.status(400).json({
