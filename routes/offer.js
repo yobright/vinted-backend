@@ -51,7 +51,7 @@ router.get("/offers", async (req, res) => {
         path: "owner",
         select: "account",
       });
-    const counter = await Offers.countDocuments(filter);
+    const counter = await Offer.countDocuments(filter);
     res.status(200).json({ offers, counter });
   } catch (error) {
     res.status(400).json({
