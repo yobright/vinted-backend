@@ -27,6 +27,7 @@
     "express-formidable": "^1.2.0",
     "helmet": "^4.1.1",
     "mongoose": "^5.10.9",
+    "stripe": "^8.121.0",
     "uid2": "0.0.3"
   }
 }

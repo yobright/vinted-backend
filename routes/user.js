@@ -26,6 +26,8 @@ router.post("/user/signup", async (req, res) => {
           account: {
             username,
             phone,
+            avatar:
+              "https://image.noelshack.com/fichiers/2020/47/2/1605630068-avatar-05d357e6.png",
           },
           token,
           hash,
