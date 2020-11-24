@@ -11,7 +11,7 @@ router.get("/offers", async (req, res) => {
     let filter = {};
     let sort = {};
     let pages = 0;
-    const numberOfResults = 3;
+    const numberOfResults = 20;
     if (req.query.title) {
       filter.product_name = new RegExp(req.query.title, "i");
     }
@@ -123,6 +123,8 @@ router.post("/offer/publish", isAuthenticated, async (req, res) => {
         ],
         owner: req.user,
       });
+
+      console.log(req.files);
 
       const result = await cloudinary.uploader.upload(req.files.picture.path, {
         folder: `/vinted/offers/${newOffer._id}`,

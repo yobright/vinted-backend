@@ -8,7 +8,7 @@ const helmet = require("helmet");
 
 const app = express();
 app.use(cors());
-app.use(formidable());
+app.use(formidable({ multiples: true }));
 app.use(helmet());
 
 // Cloudinary logs
